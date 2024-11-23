@@ -1,5 +1,17 @@
-// @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig } from "astro/config";
 
-// https://astro.build/config
-export default defineConfig({});
+import node from "@astrojs/node";
+import tailwind from "@astrojs/tailwind";
+
+import react from "@astrojs/react";
+
+export default defineConfig({
+  output: "server",
+  adapter: node({
+    mode: "standalone",
+  }),
+  devToolbar: {
+    enabled: false,
+  },
+  integrations: [tailwind(), react()],
+});

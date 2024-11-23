@@ -1,16 +1,20 @@
 ---
+import RootLayout from "@/layouts/RootLayout.astro";
+import { HomePage } from "./_components/Home.tsx";
 
+const { user } = Astro.locals;
+console.log(user);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<RootLayout>
+  {
+    user ? (
+      <HomePage client:load />
+    ) : (
+      <>
+        <h1>Login</h1>
+        <a href="/api/auth/login">Login with Twitter</a>
+      </>
+    )
+  }
+</RootLayout>
