@@ -2,7 +2,6 @@ import type { APIRoute } from "astro";
 import { supabase } from "@/lib/supabase";
 
 export const GET: APIRoute = async ({ redirect }) => {
-  console.log(import.meta.env.TWITTER_CALLBACK_URL);
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "twitter",
     options: {
