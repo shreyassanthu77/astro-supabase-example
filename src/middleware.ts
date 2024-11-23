@@ -1,39 +1,36 @@
 import { defineMiddleware, sequence } from "astro:middleware";
-import { supabase } from "@/lib/supabase";
+import { createServerClient, parseCookieHeader } from "@supabase/ssr";
 
 export const auth = defineMiddleware(
-  async ({ locals, cookies, redirect }, next) => {
-    const accessToken = cookies.get("sb-access-token");
-    const refreshToken = cookies.get("sb-refresh-token");
+  async ({ locals, request, cookies }, next) => {
+    const supabase = createServerClient(
+      import.meta.env.PUBLIC_SUPABASE_URL,
+      import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+      {
+        cookies: {
+          getAll() {
+            return parseCookieHeader(request.headers.get("Cookie") ?? "");
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookies.set(name, value, options);
+            });
+          },
+        },
+      },
+    );
 
-    if (accessToken && refreshToken) {
-      const { data, error } = await supabase.auth.setSession({
-        refresh_token: refreshToken.value,
-        access_token: accessToken.value,
-      });
+    locals.supabase = supabase;
 
-      if (error) {
-        cookies.delete("sb-access-token", {
-          path: "/",
-        });
-        cookies.delete("sb-refresh-token", {
-          path: "/",
-        });
-        return redirect("/");
-      }
-
-      locals.user = data.user;
-      cookies.set("sb-access-token", data?.session?.access_token!, {
-        sameSite: "strict",
-        path: "/",
-        secure: true,
-      });
-      cookies.set("sb-refresh-token", data?.session?.refresh_token!, {
-        sameSite: "strict",
-        path: "/",
-        secure: true,
-      });
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+    if (error || !session) {
+      return next();
     }
+    locals.session = session;
+    locals.user = session.user;
 
     return next();
   },

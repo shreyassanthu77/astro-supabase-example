@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
-import { supabase } from "@/lib/supabase";
 
-export const GET: APIRoute = async ({ redirect }) => {
+export const GET: APIRoute = async ({ redirect, locals }) => {
+  const { supabase } = locals;
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "twitter",
     options: {

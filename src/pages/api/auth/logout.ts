@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
-import { supabase } from "@/lib/supabase";
 
 export const GET: APIRoute = async ({ redirect, locals, cookies }) => {
+  const { supabase } = locals;
   if (!locals.user) {
     return redirect("/");
   }
